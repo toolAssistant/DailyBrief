@@ -167,6 +167,7 @@ jobs:
     needs: gate
     if: needs.gate.outputs.should-run == 'true'
     runs-on: ubuntu-latest
+    environment: LLM_API_KEY
     timeout-minutes: 25
     steps:
       - name: Checkout code
@@ -198,7 +199,7 @@ jobs:
 
       - name: Generate today's report
         env:
-          LLM_BACKEND: ${{ vars.LLM_BACKEND || 'anthropic' }}
+          LLM_BACKEND: ${{ vars.LLM_BACKEND || (vars.LLM_BASE_URL && 'openai') || 'anthropic' }}
           LLM_MODEL: ${{ vars.LLM_MODEL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
