@@ -59,11 +59,24 @@ function getClient(cfg: OpenAICompatConfig): { client: OpenAI; model: string } {
     || process.env.LLM_BASE_URL?.trim()
     || cfg.defaultBaseUrl;
   const model = process.env.LLM_MODEL?.trim() || cfg.defaultModel;
+  const isCustomBaseURL = baseURL !== cfg.defaultBaseUrl;
 
   const cacheKey = `${baseURL}::${apiKey.slice(-6)}`;
   let client = clientCache.get(cacheKey);
   if (!client) {
-    client = new OpenAI({ apiKey, baseURL });
+    client = new OpenAI({
+      apiKey,
+      baseURL,
+      ...(isCustomBaseURL
+        ? {
+            defaultHeaders: {
+              "User-Agent":
+                process.env.LLM_USER_AGENT?.trim()
+                || "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+            },
+          }
+        : {}),
+    });
     clientCache.set(cacheKey, client);
   }
   return { client, model };
